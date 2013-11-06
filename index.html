@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <pre data-bind="foreach: chars"><span data-bind="
+    text: $data,
+    css: { 
+      typed: $root.hasTypedCharacterCorrectly.bind($root, $index)(),
+      wrong: $root.hasTypedCharacterIncorrectly.bind($root, $index)(),
+      next: $root.isNextCharacterToBeTyped.bind($root, $index)(),
+      return: $data === '\n'
+    }
+  "></span></pre>
+  <textarea class="offscreen" data-bind="
+    value: typed, 
+    valueUpdate: 'afterkeydown', 
+    alwaysFocus: true
+  "></textarea>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script> 
+  <script src="script.js"></script>
+</body>
+</html>

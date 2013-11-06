@@ -1,0 +1,20 @@
+.offscreen {
+  position: absolute;
+  left: -100%;
+}
+
+pre > span {
+  color: #ccc;
+}
+
+pre > .typed {
+  color: black;
+}
+
+pre > .next {
+  background: #333;
+}
+
+.return.next::before {
+  content: "\21A9";
+}
