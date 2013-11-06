@@ -35,7 +35,7 @@ ko.bindingHandlers.alwaysFocus = {
     var blurHandler = ko.utils.domData.get(element, 'alwaysFocusBlurHandler');
     if (ko.unwrap(valueAccessor())) {
       element.addEventListener('blur', blurHandler);
-      setTimeout(function() { element.focus(); }, 0);
+      blurHandler();
     } else {
       element.removeEventListener('blur', blurHandler);
     }
