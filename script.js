@@ -1,8 +1,19 @@
-//var fullText = 'var foo = \'bar\';\nvar baz = \'booze\';\n\nif (blaz) {\n  return haz;\n}';
-
 var fullText = '<!doctype html>\n<html>\n<head>\n  <meta charset="utf-8">\n  <link href="styles.css" rel="stylesheet">\n</head>\n<body>\n\n  <pre data-bind="foreach: charactersInFullText"><span data-bind="\n    text: character,\n    class: syntaxHighlightClasses,\n    css: {\n      typed: hasBeenTypedCorrectly,\n      wrong: hasBeenTypedIncorrectly,\n      next: isNextCharacterToBeTyped,\n      return: isReturn\n    }\n  "></span></pre>\n\n  <textarea class="offscreen" data-bind="\n    value: typedText,\n    valueUpdate: \'afterkeydown\',\n    alwaysFocus: true\n  "></textarea>\n\n  <script src="knockout-3.0.0.js"></script> \n  <script src="prism.js"></script>\n  <script src="script.js"></script>\n</body>\n</html>\n';
 
 var classNamesForIndices = [];
+
+var escapePrism = function(code) {
+  return code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/\u00a0/g, ' ');
+};
+
+var unescapePrism = function(code) {
+  return code
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<');
+};
 
 (function() {
   var currIndexInFullText = 0;
@@ -10,9 +21,7 @@ var classNamesForIndices = [];
     for (var i = 0; i < nodes.length; ++i) {
       var node = nodes[i];
       if (node.nodeType === 3) { // Text
-        console.log('Text:', node.nodeValue);
-        var value = node.nodeValue.replace(/&amp;/g, '&').replace(/&lt;/g, '<');
-        var textLength = value.length;
+        var textLength = unescapePrism(node.nodeValue).length;
         for (var j = 0; j < textLength; ++j) {
           classNamesForIndices[currIndexInFullText + j] = currentClassName;
         }
@@ -26,18 +35,11 @@ var classNamesForIndices = [];
     }
   };
 
-  var textToParse = fullText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
-  var highlightedText = Prism.highlight(textToParse, Prism.languages.markup, 'html');
-
-  console.log(highlightedText);
-
+  var highlightedText = Prism.highlight(escapePrism(fullText), Prism.languages.markup, 'html');
   var container = document.createElement('pre');
   container.innerHTML = highlightedText;
-
   parsePrismNodes([container], '');
 }());
-
-//console.log(classNamesForIndices);
 
 var indicesToSkip = [];
 var skipInitialWhitespace = /^\s+/gm;
