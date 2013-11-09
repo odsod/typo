@@ -1,57 +1,72 @@
-var fullText = '<!doctype html>\n<html>\n<head>\n  <meta charset="utf-8">\n  <link href="styles.css" rel="stylesheet">\n</head>\n<body>\n\n  <pre data-bind="foreach: charactersInFullText"><span data-bind="\n    text: character,\n    class: syntaxHighlightClasses,\n    css: {\n      typed: hasBeenTypedCorrectly,\n      wrong: hasBeenTypedIncorrectly,\n      next: isNextCharacterToBeTyped,\n      return: isReturn\n    }\n  "></span></pre>\n\n  <textarea class="offscreen" data-bind="\n    value: typedText,\n    valueUpdate: \'afterkeydown\',\n    alwaysFocus: true\n  "></textarea>\n\n  <script src="knockout-3.0.0.js"></script> \n  <script src="prism.js"></script>\n  <script src="script.js"></script>\n</body>\n</html>\n';
+var fullText = '<!doctype html> \n<html>\n<head>\n  <meta charset="utf-8">\n  <link href="styles.css" rel="stylesheet">\n</head>\n<body>\n\n  <pre data-bind="foreach: charactersInFullText"><span data-bind="\n    text: character,\n    class: syntaxHighlightClasses,\n    css: {\n      typed: hasBeenTypedCorrectly,\n      wrong: hasBeenTypedIncorrectly,\n      next: isNextCharacterToBeTyped,\n      return: isReturn\n    }\n  "></span></pre>\n\n  <textarea class="offscreen" data-bind="\n    value: typedText,\n    valueUpdate: \'afterkeydown\',\n    alwaysFocus: true\n  "></textarea>\n\n  <script src="knockout-3.0.0.js"></script> \n  <script src="prism.js"></script>\n  <script src="script.js"></script>\n</body>\n</html>\n';
 
-var classNamesForIndices = [];
+var syntaxHighlightClasses = (function() {
+  var escapePrism = function(code) {
+    return code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/\u00a0/g, ' ');
+  };
 
-var escapePrism = function(code) {
-  return code
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/\u00a0/g, ' ');
-};
+  var unescapePrism = function(code) {
+    return code
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<');
+  };
 
-var unescapePrism = function(code) {
-  return code
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<');
-};
+  var syntaxHighlightClassesAtIndex = [],
+      currIndexInFullText = 0;
 
-(function() {
-  var currIndexInFullText = 0;
   var parsePrismNodes = function parsePrismNodes(nodes, currentClassName) {
     for (var i = 0; i < nodes.length; ++i) {
       var node = nodes[i];
       if (node.nodeType === 3) { // Text
         var textLength = unescapePrism(node.nodeValue).length;
         for (var j = 0; j < textLength; ++j) {
-          classNamesForIndices[currIndexInFullText + j] = currentClassName;
+          syntaxHighlightClassesAtIndex[currIndexInFullText + j] = currentClassName;
         }
         currIndexInFullText += textLength;
       } else if (node.nodeType === 1) { // Parent node
         parsePrismNodes(node.childNodes, node.className);
       } else {
-        console.log(node);
-        //throw new Error('Unexpected nodeType ' + node.nodeType);
+        throw new Error('Unexpected nodeType ' + node.nodeType);
       }
     }
   };
 
-  var highlightedText = Prism.highlight(escapePrism(fullText), Prism.languages.markup, 'html');
+  var syntaxHighlightedMarkup = Prism.highlight(escapePrism(fullText),
+                                                Prism.languages.markup,
+                                                'html');
+
   var container = document.createElement('pre');
-  container.innerHTML = highlightedText;
+  container.innerHTML = syntaxHighlightedMarkup;
   parsePrismNodes([container], '');
+
+  return syntaxHighlightClassesAtIndex;
 }());
 
-var indicesToSkip = [];
-var skipInitialWhitespace = /^\s+/gm;
-var match;
-while (!!(match = skipInitialWhitespace.exec(fullText))) {
-  for (var i = 0; i < match[0].length; ++i) {
-    indicesToSkip[match.index + i] = true;
-  }
-}
+var indicesToSkip = (function() {
+  var patternsToSkip = [
+    /\s+$/gm, // Trailing whitespace
+    /^\s+/gm // Leading whitespace (indentation)
+  ];
 
-var UntypeableCharacter = function(fullText, indexInFullText) {
-  this.character = fullText[indexInFullText];
+  var shouldSkipCharacterAtIndex = [];
+
+  patternsToSkip.forEach(function(pattern) {
+    var match;
+    while (!!(match = pattern.exec(fullText))) {
+      for (var i = 0; i < match[0].length; ++i) {
+        shouldSkipCharacterAtIndex[match.index + i] = true;
+      }
+    }
+  });
+
+  return shouldSkipCharacterAtIndex;
+}());
+
+var UntypeableCharacter = function(character) {
+  this.character = character;
   this.hasBeenTypedCorrectly = false;
   this.hasBeenTypedIncorrectly = false;
   this.isNextCharacterToBeTyped = false;
@@ -114,9 +129,13 @@ vm.typedText = ko.observable('');
 
 vm.charactersInFullText = fullText.split('').map(function(_, indexInFullText) {
   if (indicesToSkip[indexInFullText]) {
-    return new UntypeableCharacter(fullText, indexInFullText);
+    return new UntypeableCharacter(fullText[indexInFullText]);
   } else {
-    return new TypeableCharacter(fullText, indexInFullText, vm.typedText, indicesToSkip, classNamesForIndices[indexInFullText]);
+    return new TypeableCharacter(fullText,
+                                 indexInFullText,
+                                 vm.typedText,
+                                 indicesToSkip,
+                                 syntaxHighlightClasses[indexInFullText]);
   }
 });
 
