@@ -8,6 +8,7 @@
 
   <pre data-bind="foreach: charactersInFullText"><span data-bind="
     text: character,
+    class: syntaxHighlightClasses,
     css: {
       typed: hasBeenTypedCorrectly,
       wrong: hasBeenTypedIncorrectly,
@@ -22,7 +23,8 @@
     alwaysFocus: true
   "></textarea>
 
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script> 
+  <script src="knockout-3.0.0.js"></script> 
+  <script src="prism.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
