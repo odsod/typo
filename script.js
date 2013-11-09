@@ -1,29 +1,43 @@
-var fullText = 'var foo = \'bar\';\nvar baz = \'booze\';\n\nif (blaz) {\n  return haz;\n}';
+//var fullText = 'var foo = \'bar\';\nvar baz = \'booze\';\n\nif (blaz) {\n  return haz;\n}';
 
-var highlightedText = Prism.highlight(fullText, Prism.languages.javascript, 'javascript');
-var container = document.createElement('div');
-container.innerHTML = highlightedText;
+var fullText = '<!doctype html>\n<html>\n<head>\n  <meta charset="utf-8">\n  <link href="styles.css" rel="stylesheet">\n</head>\n<body>\n\n  <pre data-bind="foreach: charactersInFullText"><span data-bind="\n    text: character,\n    class: syntaxHighlightClasses,\n    css: {\n      typed: hasBeenTypedCorrectly,\n      wrong: hasBeenTypedIncorrectly,\n      next: isNextCharacterToBeTyped,\n      return: isReturn\n    }\n  "></span></pre>\n\n  <textarea class="offscreen" data-bind="\n    value: typedText,\n    valueUpdate: \'afterkeydown\',\n    alwaysFocus: true\n  "></textarea>\n\n  <script src="knockout-3.0.0.js"></script> \n  <script src="prism.js"></script>\n  <script src="script.js"></script>\n</body>\n</html>\n';
+
 var classNamesForIndices = [];
-var currNode = container.firstChild,
-    currIndexInFullText = 0;
-while (currNode) {
-  var currNodeTextLength,
-      currNodeClasses;
-  if (currNode.nodeType === 1) { // Wrapper
-    currNodeTextLength = currNode.innerText.length;
-    currNodeClasses = currNode.className;
-  } else if (currNode.nodeType === 3) { // Text
-    currNodeTextLength = currNode.nodeValue.length;
-    currNodeClasses = '';
-  } else {
-    throw new Error('Unexpected nodeType ' + currNode.nodeType);
-  }
-  for (var i = 0; i < currNodeTextLength; ++i) {
-    classNamesForIndices[currIndexInFullText + i] = currNodeClasses;
-  }
-  currIndexInFullText += currNodeTextLength;
-  currNode = currNode.nextSibling;
-}
+
+(function() {
+  var currIndexInFullText = 0;
+  var parsePrismNodes = function parsePrismNodes(nodes, currentClassName) {
+    for (var i = 0; i < nodes.length; ++i) {
+      var node = nodes[i];
+      if (node.nodeType === 3) { // Text
+        console.log('Text:', node.nodeValue);
+        var value = node.nodeValue.replace(/&amp;/g, '&').replace(/&lt;/g, '<');
+        var textLength = value.length;
+        for (var j = 0; j < textLength; ++j) {
+          classNamesForIndices[currIndexInFullText + j] = currentClassName;
+        }
+        currIndexInFullText += textLength;
+      } else if (node.nodeType === 1) { // Parent node
+        parsePrismNodes(node.childNodes, node.className);
+      } else {
+        //console.log(node);
+        //throw new Error('Unexpected nodeType ' + node.nodeType);
+      }
+    }
+  };
+
+  var textToParse = fullText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
+  var highlightedText = Prism.highlight(textToParse, Prism.languages.markup, 'html');
+
+  console.log(highlightedText);
+
+  var container = document.createElement('pre');
+  container.innerHTML = highlightedText;
+
+  parsePrismNodes([container], '');
+}());
+
+//console.log(classNamesForIndices);
 
 var indicesToSkip = [];
 var skipInitialWhitespace = /^\s+/gm;

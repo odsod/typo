@@ -1,0 +1,20 @@
+{
+  "name": "typo",
+  "version": "0.0.0",
+  "dependencies": {
+    "jsesc": "~0.4.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/odsod/typo"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/odsod/typo/issues"
+  }
+}
