@@ -5,20 +5,23 @@
   <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-  <pre data-bind="foreach: chars"><span data-bind="
-    text: $data,
-    css: { 
-      typed: $root.hasTypedCharacterCorrectly.bind($root, $index)(),
-      wrong: $root.hasTypedCharacterIncorrectly.bind($root, $index)(),
-      next: $root.isNextCharacterToBeTyped.bind($root, $index)(),
-      return: $data === '\n'
+
+  <pre data-bind="foreach: charactersInFullText"><span data-bind="
+    text: character,
+    css: {
+      typed: hasBeenTypedCorrectly,
+      wrong: hasBeenTypedIncorrectly,
+      next: isNextCharacterToBeTyped,
+      return: isReturn
     }
   "></span></pre>
+
   <textarea class="offscreen" data-bind="
-    value: typed, 
-    valueUpdate: 'afterkeydown', 
+    value: typedText,
+    valueUpdate: 'afterkeydown',
     alwaysFocus: true
   "></textarea>
+
   <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script> 
   <script src="script.js"></script>
 </body>

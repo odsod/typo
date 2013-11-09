@@ -3,18 +3,27 @@
   left: -100%;
 }
 
-pre > span {
+span {
   color: #ccc;
 }
 
-pre > .typed {
+.typed {
   color: black;
 }
 
-pre > .next {
+.next {
   background: #333;
 }
 
-.return.next::before {
+.wrong {
+  color: black;
+  background: #ffaaaa;
+}
+
+.skip {
+  background: green;
+}
+
+.return.next::before, .return.wrong::before {
   content: "\21A9";
 }
