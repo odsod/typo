@@ -29,7 +29,7 @@ var unescapePrism = function(code) {
       } else if (node.nodeType === 1) { // Parent node
         parsePrismNodes(node.childNodes, node.className);
       } else {
-        //console.log(node);
+        console.log(node);
         //throw new Error('Unexpected nodeType ' + node.nodeType);
       }
     }
@@ -147,10 +147,6 @@ ko.bindingHandlers['class'] = {
     ko.utils.toggleDomNodeCssClass(element, value, true);
     element['__ko__previousClassValue__'] = value;
   }
-};
-
-vm.getSyntaxHighlightClassesForIndex = function(index) {
-  return classNamesForIndices[ko.unwrap(index)];
 };
 
 ko.applyBindings(vm);
