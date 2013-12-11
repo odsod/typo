@@ -2,7 +2,8 @@
   "name": "typo",
   "version": "0.0.0",
   "dependencies": {
-    "jsesc": "~0.4.3"
+    "jsesc": "~0.4.3",
+    "node-static": "~0.7.2"
   },
   "devDependencies": {},
   "scripts": {

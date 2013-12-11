@@ -47,8 +47,8 @@ var syntaxHighlightClasses = (function() {
 
 var indicesToSkip = (function() {
   var patternsToSkip = [
-    /\s+$/gm, // Trailing whitespace
-    /^\s+/gm // Leading whitespace (indentation)
+    /[ \t]+$/gm, // Trailing whitespace
+    /^[ \t]+/gm // Leading whitespace (indentation)
   ];
 
   var shouldSkipCharacterAtIndex = [];
@@ -56,6 +56,7 @@ var indicesToSkip = (function() {
   patternsToSkip.forEach(function(pattern) {
     var match;
     while (!!(match = pattern.exec(fullText))) {
+      console.log(match);
       for (var i = 0; i < match[0].length; ++i) {
         shouldSkipCharacterAtIndex[match.index + i] = true;
       }
